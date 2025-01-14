@@ -15,14 +15,21 @@ class DiscriminatorNet(nn.Module):
 
     def forward(self, x):
         x = self.fcs_1(x)
-        x = F.leaky_relu(x, 0.2)
+        # x = F.leaky_relu(x, 0.2)
+        x = nn.LeakyReLU(inplace=True)(x)
+        x = self.drop_2(x)
 
         x = self.fcs_2(x)
-        x = F.leaky_relu(x, 0.2)
+        # x = F.leaky_relu(x, 0.2)
+        x = nn.LeakyReLU(inplace=True)(x)
+        x = self.drop_2(x)
 
         x = self.fcs_3(x)
-        x = F.leaky_relu(x, 0.2)
+        # x = F.leaky_relu(x, 0.2)
+        x = nn.LeakyReLU(inplace=True)(x)
+        x = self.drop_2(x)
 
         x = self.output(x)
         
-        return torch.sigmoid(x)
+        # return torch.sigmoid(x)
+        return nn.Sigmoid()(x)
