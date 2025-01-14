@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
+        transforms.Normalize([0.5], [0.5])
     ])
 
     batch_size = 256
@@ -30,10 +30,10 @@ if __name__ == "__main__":
     D_Net = DiscriminatorNet().to(device)
 
     G_criterion = nn.BCELoss()
-    G_optimizer = optim.Adam(G_Net.parameters(), lr=0.001)
+    G_optimizer = optim.Adam(G_Net.parameters(), lr=0.0002)
 
     D_criterion = nn.BCELoss()
-    D_optimizer = optim.Adam(D_Net.parameters(), lr=0.001)
+    D_optimizer = optim.Adam(D_Net.parameters(), lr=0.0002)
 
     epochs = 100
     z_dim = 100
@@ -44,10 +44,9 @@ if __name__ == "__main__":
             real_labels = torch.ones(batch_size, 1).to(device)
             real_images = real_images.flatten(1).to(device)
 
-            noise = torch.rand(batch_size, z_dim).to(device)
+            noise = torch.randn(batch_size, z_dim).to(device)
 
             fake_images = G_Net(noise)
-            # fake_images = (fake_images + 1) / 2
             fake_labels = torch.zeros(real_images.size(0), 1).to(device)
 
             train_images_D = torch.cat((real_images, fake_images))
@@ -70,8 +69,8 @@ if __name__ == "__main__":
 
             if D_loss.item() < 1:
                 D_Net.eval()
-                noise = torch.rand(batch_size, z_dim).to(device)
-                G_labels = torch.ones(batch_size, 1).to(device)
+                noise = torch.randn(batch_size, z_dim).to(device)
+                G_labels = torch.ones(batch_size, 1).to(device) - 0.1
 
                 G_outputs = G_Net(noise)
                 D_prediction = D_Net(G_outputs)
@@ -88,18 +87,16 @@ if __name__ == "__main__":
 
         print()
 
-        if epoch % 30 == 0:
-            noise = torch.rand(16, z_dim).to(device)  # Sinh 16 mẫu ngẫu nhiên
+        if epoch % 10 == 0:
+            noise = torch.rand(25, z_dim).to(device)
             with torch.no_grad():
-                fake_images = G_Net(noise).view(-1, 1, 28, 28)  # Tạo 16 ảnh giả
+                fake_images = G_Net(noise).view(-1, 1, 28, 28)
 
-            # Tạo grid (lưới) 4x4 cho 16 ảnh
-            grid = torchvision.utils.make_grid(fake_images, nrow=4, normalize=True)
+            grid = torchvision.utils.make_grid(fake_images, nrow=5, normalize=True)
 
-            # Hiển thị lưới
-            plt.figure(figsize=(8, 8))  # Điều chỉnh kích thước hình
-            plt.imshow(grid.permute(1, 2, 0).cpu())  # Chuyển thứ tự kênh để hiển thị
-            plt.axis('off')  # Tắt trục
+            plt.figure(figsize=(6, 6))
+            plt.imshow(grid.permute(1, 2, 0).cpu())
+            plt.axis('off')
             plt.title(f"Generated Images at Epoch {epoch+1}")
             plt.show()
 
@@ -115,6 +112,5 @@ if __name__ == "__main__":
 
     plt.show()
 
-    torch.save(G_Net.state_dict(), "trained_model/G_Net_v2.pth")
-    torch.save(D_Net.state_dict(), "trained_model/D_Net_v2.pth")
-
+    torch.save(G_Net.state_dict(), "trained_model/G_Net_v7.pth")
+    torch.save(D_Net.state_dict(), "trained_model/D_Net_v7.pth")
