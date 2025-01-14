@@ -14,23 +14,22 @@ class GeneratorNet(nn.Module):
         self.batchnorm_1 = nn.BatchNorm1d(256)
         self.batchnorm_2 = nn.BatchNorm1d(512)
         self.batchnorm_3 = nn.BatchNorm1d(1024)
+        self.tanh = nn.Tanh()
 
     def forward(self, x):
         x = self.fcs_1(x)
-        # x = self.batchnorm_1(x)
-        x = F.leaky_relu(x, 0.2)
-        x = self.drop(x)
+        x = self.batchnorm_1(x)
+        x = nn.LeakyReLU(inplace=True)(x)
 
         x = self.fcs_2(x)
-        # x = self.batchnorm_2(x)
-        x = F.leaky_relu(x, 0.2)
-        x = self.drop(x)
+        x = self.batchnorm_2(x)
+        x = nn.LeakyReLU(inplace=True)(x)
 
         x = self.fcs_3(x)
-        # x = self.batchnorm_3(x)
-        x = F.leaky_relu(x, 0.2)
-        x = self.drop(x)
+        x = self.batchnorm_3(x)
+        x = nn.LeakyReLU(inplace=True)(x)
 
         x = self.output(x)
 
-        return torch.sigmoid(x)
+        # return torch.sigmoid(x)
+        return self.tanh(x)
